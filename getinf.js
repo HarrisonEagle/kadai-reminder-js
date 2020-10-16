@@ -1,5 +1,112 @@
-$('HTML').bind('DOMSubtreeModified', function() {
-  $('a[aria-label="すべてフィルタオプション"]').click();
-  $('li[data-control="next"]').find('.page-link')[1].click();
-  console.log($('li[data-control="next"]').find('.page-link').eq(1).parent().hasClass('disabled')+""+$('.icon.fa.fa-circle-o-notch.fa-spin.fa-fw:visible').length
-)});
+var executed = false;
+
+const request = self.indexedDB.open('kadaiDB',3);
+var db = null;
+request.onerror=function(event){
+  console.log("Error opening DB");
+}
+request.onsuccess=function(event){
+  db = event.target.result;
+  console.log("db connected");
+  console.log(db.version);
+}
+request.onupgradeneeded = function(event) {
+  console.log("db updating");
+  db = event.target.result;
+  var objectStore = db.createObjectStore("kadais", { keyPath: "id" });
+  objectStore.createIndex("name", "name", { unique: false });
+  objectStore.createIndex("url", "url", { unique: false });
+  objectStore.createIndex("time", "time", { unique: false });
+  objectStore.createIndex("notifyed", "notifyed", { unique: false });
+  objectStore.transaction.oncomplete = function(event) {
+    console.log("db updated");
+  };
+};
+function waitMsec(sec){
+  time = new Date().getMilliseconds()+sec;
+  while(new Date().getMilliseconds()<time);
+}
+async function addtodb(i,transaction,final) {
+  var inf = $(".w-100.event-name-container.text-truncate.line-height-3").eq(i).find("a").eq(0).attr("aria-label");
+  var ourl = $(".w-100.event-name-container.text-truncate.line-height-3").eq(i).find("a").eq(0).attr("href");
+  var oid = ourl.substring(ourl.indexOf("id=")+3);
+  var oname = inf.substring(0,inf.indexOf("活動は"));
+  var time = inf.substring(inf.indexOf("活動は")+3,inf.indexOf("が期限です")).replace("年 ","/").replace("月 ","/").replace("日","")+":00";
+  var deadline = new Date(time);
+  if(deadline.getTime()>=new Date().getTime()){
+    let objectStore = transaction.objectStore("kadais");
+    let object ={
+      id: oid,
+      name:oname,
+      url:ourl,
+      time:deadline,
+      notifyed:"0"
+    }
+    console.log(oid+" "+oname);
+    var req = objectStore.openCursor(oid);
+    req.onsuccess = function(e) {
+      var cursor = e.target.result;
+      if (cursor) { // key already exist
+        console.log(oid+"exists");
+        if(final==i){
+          notifyMe("データの同期が完了しました(1)");
+          window.close();
+        }
+      } else { // key not exist
+        let request = objectStore.add(object);
+        request.onsuccess = function() { // (4)
+          console.log("Object added", request.result);
+          if(final==i){
+            notifyMe("データの同期が完了しました(0)");
+            window.close();
+          }
+        };
+        request.onerror = function() {
+          console.log(oid+"err0r");
+          console.log("AddError", request.error);
+          if(final==i){
+            notifyMe("データの同期が完了しました(1)");
+            window.close();
+          }
+      };
+      }
+    };
+
+  }
+}
+function notifyMe(msg) {
+ if (Notification.permission !== 'granted')
+  Notification.requestPermission();
+ else {
+  var notification = new Notification('Notification title', {
+   body: msg,
+  });
+  notification.onclick = function() {
+  };
+ }
+}
+$(document).ready(function(){
+  //何かしらの処理
+  var all = document.querySelectorAll('[aria-label="すべてフィルタオプション"]')[0];
+  notifyMe("同期してます...(1/2)");
+  $('HTML').bind('DOMSubtreeModified', async function() {
+    if(all.getAttribute("aria-current")!="true"){
+      console.log("not-found");
+      all.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    }
+    var next = document.querySelectorAll('li[data-control="next"]')[1];
+    next.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    var flag = next.className.includes('disabled')+""+$('.icon.fa.fa-circle-o-notch.fa-spin.fa-fw:visible').length;
+    console.log(flag);
+    if(flag=="true0"&&executed==false){
+      executed = true;
+      var data = $(".w-100.event-name-container.text-truncate.line-height-3");
+      notifyMe("同期してます...(2/2)");
+      for (let i = 0; i < data.length; i++) {
+        var transaction = db.transaction(["kadais"], "readwrite");
+        await addtodb(i,transaction,data.length-1);
+      }
+      //10分前、1日前、一週間前
+    }
+  });
+});
