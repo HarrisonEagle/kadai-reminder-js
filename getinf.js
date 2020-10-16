@@ -1,32 +1,53 @@
 var executed = false;
 
-const request = self.indexedDB.open('kadaiDB',3);
-var db = null;
-request.onerror=function(event){
-  console.log("Error opening DB");
-}
-request.onsuccess=function(event){
-  db = event.target.result;
-  console.log("db connected");
-  console.log(db.version);
-}
-request.onupgradeneeded = function(event) {
-  console.log("db updating");
-  db = event.target.result;
-  var objectStore = db.createObjectStore("kadais", { keyPath: "id" });
-  objectStore.createIndex("name", "name", { unique: false });
-  objectStore.createIndex("url", "url", { unique: false });
-  objectStore.createIndex("time", "time", { unique: false });
-  objectStore.createIndex("notifyed", "notifyed", { unique: false });
-  objectStore.transaction.oncomplete = function(event) {
-    console.log("db updated");
-  };
-};
+
 function waitMsec(sec){
   time = new Date().getMilliseconds()+sec;
   while(new Date().getMilliseconds()<time);
 }
+
+function notifyMe(msg) {
+ if (Notification.permission !== 'granted')
+  Notification.requestPermission();
+ else {
+  var notification = new Notification('Notification title', {
+   body: msg,
+  });
+  notification.onclick = function() {
+  };
+ }
+}
+
+var request = null;
+var db = null;
+
+function opendb(){
+  request = window.indexedDB.open('kadaiDB',4);;
+  db = null;
+  request.onerror=function(event){
+    console.log("Error opening DB");
+  }
+  request.onsuccess=function(event){
+    db = event.target.result;
+    console.log("db connected");
+    console.log(db.version);
+  }
+  request.onupgradeneeded = function(event) {
+    console.log("db updating");
+    db = event.target.result;
+    var objectStore = db.createObjectStore("kadais", { keyPath: "id" });
+    objectStore.createIndex("name", "name", { unique: false });
+    objectStore.createIndex("url", "url", { unique: false });
+    objectStore.createIndex("time", "time", { unique: false });
+    objectStore.createIndex("notifyed", "notifyed", { unique: false });
+    objectStore.transaction.oncomplete = function(event) {
+      console.log("db updated");
+    };
+  };
+}
+
 async function addtodb(i,transaction,final) {
+  console.log("add:"+i);
   var inf = $(".w-100.event-name-container.text-truncate.line-height-3").eq(i).find("a").eq(0).attr("aria-label");
   var ourl = $(".w-100.event-name-container.text-truncate.line-height-3").eq(i).find("a").eq(0).attr("href");
   var oid = ourl.substring(ourl.indexOf("id=")+3);
@@ -49,7 +70,7 @@ async function addtodb(i,transaction,final) {
       if (cursor) { // key already exist
         console.log(oid+"exists");
         if(final==i){
-          notifyMe("データの同期が完了しました(1)");
+          notifyMe("データの同期が完了しました(0)");
           window.close();
         }
       } else { // key not exist
@@ -58,7 +79,7 @@ async function addtodb(i,transaction,final) {
           console.log("Object added", request.result);
           if(final==i){
             notifyMe("データの同期が完了しました(0)");
-            window.close();
+           window.close();
           }
         };
         request.onerror = function() {
@@ -74,17 +95,8 @@ async function addtodb(i,transaction,final) {
 
   }
 }
-function notifyMe(msg) {
- if (Notification.permission !== 'granted')
-  Notification.requestPermission();
- else {
-  var notification = new Notification('Notification title', {
-   body: msg,
-  });
-  notification.onclick = function() {
-  };
- }
-}
+
+
 $(document).ready(function(){
   //何かしらの処理
   notifyMe("同期してます...(1/2)");
@@ -105,12 +117,36 @@ $(document).ready(function(){
     console.log(flag);
     if(flag=="true0"&&executed==false){
       executed = true;
-      var data = $(".w-100.event-name-container.text-truncate.line-height-3");
-      notifyMe("同期してます...(2/2)");
-      for (let i = 0; i < data.length; i++) {
-        var transaction = db.transaction(["kadais"], "readwrite");
-        await addtodb(i,transaction,data.length-1);
-      }
+      const promise = new Promise(function(){
+        request = window.indexedDB.open('kadaiDB',4);;
+        db = null;
+        request.onerror=function(event){
+          console.log("Error opening DB");
+        }
+        request.onsuccess=async function(event){
+          db = event.target.result;
+          console.log("db connected");
+          var data = $(".w-100.event-name-container.text-truncate.line-height-3");
+          console.log(data.length);
+          for (let i = 0; i < data.length; i++) {
+            var transaction = db.transaction(["kadais"], "readwrite");
+            await addtodb(i,transaction,data.length-1);
+          }
+        }
+        request.onupgradeneeded = function(event) {
+          console.log("db updating");
+          db = event.target.result;
+          var objectStore = db.createObjectStore("kadais", { keyPath: "id" });
+          objectStore.createIndex("name", "name", { unique: false });
+          objectStore.createIndex("url", "url", { unique: false });
+          objectStore.createIndex("time", "time", { unique: false });
+          objectStore.createIndex("notifyed", "notifyed", { unique: false });
+          objectStore.transaction.oncomplete = async function(event) {
+            console.log("db updated");
+          };
+        };
+      });
+
       //10分前、1日前、一週間前
     }
   });
