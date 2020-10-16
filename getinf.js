@@ -42,7 +42,7 @@ async function addtodb(i,transaction,final) {
       time:deadline,
       notifyed:"0"
     }
-    console.log(oid+" "+oname);
+    console.log(oid+" "+oname+" "+time);
     var req = objectStore.openCursor(oid);
     req.onsuccess = function(e) {
       var cursor = e.target.result;
@@ -87,12 +87,17 @@ function notifyMe(msg) {
 }
 $(document).ready(function(){
   //何かしらの処理
-  var all = document.querySelectorAll('[aria-label="すべてフィルタオプション"]')[0];
   notifyMe("同期してます...(1/2)");
   $('HTML').bind('DOMSubtreeModified', async function() {
+    var all = document.querySelectorAll('[aria-label="次の6か月間フィルタオプション"]')[0];
+    var tf = document.querySelectorAll('[data-limit="25"]')[0];
     if(all.getAttribute("aria-current")!="true"){
       console.log("not-found");
       all.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    }
+    if(tf.getAttribute("aria-current")!="true"){
+      console.log("not25");
+      tf.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     }
     var next = document.querySelectorAll('li[data-control="next"]')[1];
     next.dispatchEvent(new MouseEvent("click", { bubbles: true }));
