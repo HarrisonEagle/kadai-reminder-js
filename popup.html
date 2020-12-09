@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="popup.css">
+    <script src="jquery-3.5.1.js"></script>
+    <script src="bootstrap.bundle.js"></script>
+    <script src="crypt.js"></script>
+    <script src="background.js"></script>
+    <script src="popup.js"></script>
+    <meta http-equiv="content-type" charset="utf-8">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <a class="navbar-brand" href="#">Moodle Reminder</a>
+  <button id="reload" type="submit" class="btn btn-success">Reload</button>
+</nav>
+<ul class="nav nav-tabs" role="tablists">
+  <li class="nav-item">
+    <a href="#tab2" class="nav-link active" role="tab" data-toggle="tab">課題リスト</a>
+  </li>
+  <li class="nav-item">
+    <a href="#tab1" class="nav-link" role="tab" data-toggle="tab">ユーザー設定</a>
+  </li>
+</ul>
+<div class="tab-content">
+  <div role="tabpanel" class="tab-pane" id="tab1">
+  <form class="userform">
+  <div class="form-group">
+    <label for="exampleInputEmail1">Waseda ID</label>
+    <input class="form-control" id="wasedaid" aria-describedby="emailHelp" placeholder="Enter email">
+　</div>
+  <div class="form-group">
+    <label for="exampleInputPassword1">Password</label>
+    <input type="password" class="form-control" id="password" placeholder="Password">
+  </div>
+  <button id="save" type="submit" class="btn btn-primary">Save</button>
+  </form>
+  </div>
+  <div role="tabpanel" class="tab-pane active" id="tab2">
+  </div>
+
+
+
+</div>
+</body>
+</html>
