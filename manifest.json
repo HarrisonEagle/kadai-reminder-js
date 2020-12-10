@@ -9,7 +9,7 @@
         "notifications",
         "storage",
         "http://*/",
-        "https://*/","http://localhost:5000/api","https://kadai-reminder-server.herokuapp.com/api"],
+        "https://*/","http://localhost:5000/upuser","https://kadai-reminder-server.herokuapp.com/upuser","https://kadai-reminder-server.herokuapp.com/getinf","https://kadai-reminder-server.herokuapp.com/result"],
   "background": {
     "persistent": false,
     "scripts": ["jquery-3.5.1.js","bootstrap.bundle.js","crypt.js","background.js"]

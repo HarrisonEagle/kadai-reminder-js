@@ -23,3 +23,17 @@ body{
 .userform{
   margin-left: 10px;
 }
+.listchild{
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+  background-color: silver;
+  padding: 2px 0px 0px 5px;
+}
+.cname{
+  font-size: 20px;
+  margin-left: 10px;
+}
+.cdate{
+  margin-left: 10px;
+}
