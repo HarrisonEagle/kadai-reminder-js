@@ -18,7 +18,7 @@ chrome.storage.local.get('kadaidata',function(json){
   //Button
   var reload = document.getElementById("reload");
   reload.addEventListener("click", function(){
-    getinf();
+    getinf(true);
   });
 
   var save = document.getElementById("save");

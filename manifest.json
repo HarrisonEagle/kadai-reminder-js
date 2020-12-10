@@ -7,11 +7,16 @@
   },
   "permissions": ["tabs",
         "notifications",
+        "alarms",
         "storage",
         "http://*/",
-        "https://*/","http://localhost:5000/upuser","https://kadai-reminder-server.herokuapp.com/upuser","https://kadai-reminder-server.herokuapp.com/getinf","https://kadai-reminder-server.herokuapp.com/result"],
+        "https://*/","http://localhost:5000/upuser","https://kadai-reminder-server.herokuapp.com/upuser","https://kadai-reminder-server.herokuapp.com/getinf","https://kadai-reminder-server.herokuapp.com/result","https://wsdmoodle.waseda.jp/*"],
   "background": {
-    "persistent": false,
-    "scripts": ["jquery-3.5.1.js","bootstrap.bundle.js","crypt.js","background.js"]
-  }
+    "persistent": true,
+    "scripts": ["jquery-3.5.1.js","bootstrap.bundle.js","crypt.js","method.js","background.js"]
+  },
+  "content_scripts": [{
+    "matches": ["https://wsdmoodle.waseda.jp/mod/*"],
+    "js": ["content.js"]
+  }]
 }
